@@ -17,8 +17,13 @@
             python312
             python312Packages.python-lsp-server
             python312Packages.flask
+            python312Packages.mechanicalsoup
+            python312Packages.selenium
 
-            nodePackages.create-cycle-app
+            chromedriver
+            chromium
+
+            nodePackages.create-react-app
             nodejs
             yarn
           ];

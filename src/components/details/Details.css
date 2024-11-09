@@ -1,0 +1,33 @@
+/* src/components/details/Details.css */
+.details {
+    
+    font-family: Arial, sans-serif; /* Font curat */
+  }
+  
+  .details-item {
+    display: grid; /* Folosim CSS Grid pentru două coloane */
+    grid-template-columns: 1fr 2fr; /* Prima coloană va fi mai mică decât a doua */
+    gap: 10px;
+    padding: 3px 0;
+  }
+  
+  .label {
+    font-weight: bold;
+    color: #000;
+  }
+  
+  .value {
+    font-weight: bold;
+    color: #000;
+  }
+  
+  h2 {
+    font-weight: normal;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  
+  p {
+    font-size: 0.9rem;
+  }
+  

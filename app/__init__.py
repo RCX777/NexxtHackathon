@@ -57,6 +57,6 @@ def hallucinate(name : str):
 
     return {"response" : ask_perplexity(query)}
 
-@app.route('/time')
+@app.route('/', methods=['GET'])
 def get_current_time():
-    return {'time': time.time()}
+    return "", 200
