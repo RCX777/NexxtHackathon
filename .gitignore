@@ -1,5 +1,6 @@
 # Python
 .venv
+app/__pycache__
 
 # Nix
 .envrc
