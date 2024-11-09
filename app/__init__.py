@@ -16,22 +16,20 @@ client_4o = AzureOpenAI(
 perp_api_key = os.environ['PERP_API_KEY']
 client_perp = OpenperplexSync(api_key=perp_api_key)
 
-def ask_perplexity(query : str):
-    result = client_perp.search(
-        query=query,
-        date_context=datetime.today().strftime('%Y-%m-%d'),
+def ask_perplexity(query : str, temp : float = 0.2, top_p : float = 0.9):
+    result = client_perp.custom_search(
+        system_prompt="You are a highly knowledgeable language model specialized in retrieving precise and up-to-date information from the live web about companies and e-commerce websites. Your output should focus on providing accurate details that can be used to analyze the trustworthiness of these entities. Prioritize factual data, current standings, recent news, user reviews, and any other relevant information that can influence credibility assessments. Ensure the information is clear, detailed, and verifiable to assist in making informed trustworthiness evaluations.",
+        user_prompt=query,
         location="ro",
         pro_mode=False,
-        response_language="en",
-        answer_type="text",
-        verbose_mode=False,
         search_type="general",
-        return_citations=False,
-        return_sources=False,
-        return_images=False
+        return_images=False,
+        return_sources=True,
+        temperature=temp,
+        top_p=top_p
     )
 
-    return result['llm_response']
+    return result['llm_response'], result['sources']
 
 def ask_4o(query : str):
     completion = client_4o.chat.completions.create(
@@ -75,3 +73,9 @@ def hallucinate(name : str):
 @app.route('/', methods=['GET'])
 def get_current_time():
     return "", 200
+
+def main():
+    app.run()
+
+if __name__ == '__main__':
+    main()
