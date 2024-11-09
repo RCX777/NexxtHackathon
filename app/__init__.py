@@ -48,14 +48,29 @@ def ask_4o(query : str):
         ]
     )
 
-    return {"response" : completion.choices[0].message.content}
+    return str(completion.choices[0].message.content)
 
 @app.route('/hal/<name>', methods=['GET'])
 def hallucinate(name : str):
     query = f"""Please provide me the following information about {name}: Key Facts, Services and Features,
-        Notable Innovations and Initiatives, Subsidiaries and Partnerships, Reputation and Trustworthiness and Challenges."""
+        Notable Innovations and Initiatives, Subsidiaries and Partnerships, Reputation and Trustworthiness and Challenges.        Keep the information concise and relevant."""
+    response = ask_perplexity(query)
 
-    return {"response" : ask_perplexity(query)}
+    question = f"Is there any recent controversy regarding {name}?"
+
+    prompt = f"""\
+        INSTRUCTION: Please use only the following information:
+        {response}
+        INSTRUCTION: Using the given information, answer to the following question.\
+        Answer with a json object containing the "answer" field which is boolean true/false,
+        and "reason" field which is the reason for the given answer. Only output valid JSON.
+        Write the JSON after the "CUE:".
+        {question}
+        CUE:
+    """
+    print(prompt)
+
+    return ask_4o(prompt), 200
 
 @app.route('/', methods=['GET'])
 def get_current_time():
