@@ -17,6 +17,10 @@
             python312
             python312Packages.python-lsp-server
             python312Packages.flask
+
+            nodePackages.create-cycle-app
+            nodejs
+            yarn
           ];
         };
       }
