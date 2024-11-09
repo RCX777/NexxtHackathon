@@ -15,8 +15,8 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             python312
-
             python312Packages.python-lsp-server
+            python312Packages.flask
           ];
         };
       }
