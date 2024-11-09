@@ -1,7 +1,7 @@
 import time
 import os
 from datetime import datetime
-from flask import Flask
+from flask import Flask, json
 from openai import OpenAI, AzureOpenAI
 from openperplex import OpenperplexSync
 
@@ -48,27 +48,46 @@ def ask_4o(query : str):
 
     return str(completion.choices[0].message.content)
 
+
+def get_questions(name : str):
+    return [
+        f'Has {name} been involved in any recent controversies?',
+        f'Is {name} an untrusted website or company?',
+        f'Does {name} have inexistent or bad customer support?',
+    ]
+
+def construct_prompt(perplexity_answer : str, question : str):
+    # return f"""INSTRUCTION: Please use only the following information, which is in the block delimited by "=====":
+    # =====
+    # {perplexity_answer}
+    # =====
+    return f"""INSTRUCTION: Using the given information, answer to the following question, which is delimited by "=====" Answer with a json object containing the "answer" field which is boolean true/false, and "reason" field which is the reason for the given answer. Only output valid JSON. Do not use any extra syntax or characters. Write the JSON after the "CUE:".
+    =====
+    {question}
+    =====
+    CUE:
+    """
+
 @app.route('/hal/<name>', methods=['GET'])
 def hallucinate(name : str):
     query = f"""Please provide me the following information about {name}: Key Facts, Services and Features,
         Notable Innovations and Initiatives, Subsidiaries and Partnerships, Reputation and Trustworthiness and Challenges.        Keep the information concise and relevant."""
-    response = ask_perplexity(query)
+    # response = ask_perplexity(query)
 
-    question = f"Is there any recent controversy regarding {name}?"
+    questions = get_questions(name)
 
-    prompt = f"""\
-        INSTRUCTION: Please use only the following information:
-        {response}
-        INSTRUCTION: Using the given information, answer to the following question.\
-        Answer with a json object containing the "answer" field which is boolean true/false,
-        and "reason" field which is the reason for the given answer. Only output valid JSON.
-        Write the JSON after the "CUE:".
-        {question}
-        CUE:
-    """
-    print(prompt)
+    output_json = '['
+    for i in range(len(questions)):
+        prompt = construct_prompt("", questions[i])
+        # print(prompt)
+        output_json += ask_perplexity(prompt) # ask_4o(prompt)
+        print(output_json)
+        print("========")
+        if i != len(questions) - 1:
+            output_json += ","
+    output_json += ']'
 
-    return ask_4o(prompt), 200
+    return json.loads(output_json), 200
 
 @app.route('/', methods=['GET'])
 def get_current_time():
