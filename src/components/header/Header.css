@@ -1,0 +1,16 @@
+/* src/components/header/Header.css */
+header {
+    background-color: yellow;  /* Setează fundalul galben pe întreaga lățime */
+    padding: 0;                 /* Elimină padding-ul */
+    margin: 0;                  /* Elimină marginile */
+    
+    display: flex;              /* Folosește Flexbox pentru aliniere */
+    justify-content: space-between; /* Spațiu între logo-uri */
+    align-items: center;        /* Aliniază elementele pe verticală */
+    height: 80px;               /* Înălțimea header-ului */
+  }
+  
+  header img {
+    height: 50px;               /* Înălțimea logo-urilor, poți ajusta după nevoie */
+  }
+  

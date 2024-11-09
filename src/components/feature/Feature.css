@@ -1,0 +1,98 @@
+.feature {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 16px;              /* Spațiu interior pentru conținut */
+  border: 1px solid #ccc;     /* Chenar ușor */
+  background-color: #f7f7f7;  /* Fundal gri deschis */
+  max-width: 520px;           /* Lățime maximă pentru chenar */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Umbră ușoară pentru efect */
+  margin-bottom: 20px;        /* Spațiu jos între componente, dacă urmează alta */
+  margin: 30px;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.check-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.feature p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  max-width: 480px; 
+}
+
+/* Lista de motive */
+.reasons-list {
+  margin-top: 0px;
+  max-width: 500px;
+}
+
+.reasons-list ul {
+  margin: 5px 0;
+  list-style-type: disc;
+  color: #e74c3c;
+  padding-left: 20px;
+  list-style-type: none;
+}
+
+.feature .reasons-list ul li {
+  font-size: 12px;
+  margin-bottom: 1px;
+}
+
+.list-icon {
+  width: 10px;            /* Dimensiunea iconiței */
+  height: 10px;
+  margin-right: 8px;      /* Spațiu între iconiță și text */
+}
+
+/* Link "aici" */
+.more-details p{
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.details-link {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.details-link:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  color: #717171;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.toggle-button:hover {
+  text-decoration: underline;
+}
+
+.reasons-list {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.list-icon {
+  margin-right: 8px;
+}
+
+.more-details {
+  margin-top: 10px;
+}
