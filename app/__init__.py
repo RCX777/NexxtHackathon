@@ -9,8 +9,6 @@ from litellm import completion, get_supported_openai_params
 import json
 import re
 import concurrent.futures
-import pdfkit
-import json2html
 
 reasons = []
 
@@ -160,38 +158,35 @@ def hallucinate(name : str):
     reasons[:] = responses
     return json.dumps({'score' : str(score), 'top reasons' : get_top_reasons(responses, score > 0.2)}), 200
 
+from fpdf import FPDF
+def json_to_pdf(data, pdf_path):
+    # Convert JSON data to a pretty printed string
+    json_str = "\t\t ===== Fraud report ===== \t\t\n"
+    for row in data:
+        json_str += f'Question: {row["question"]}\n'
+        json_str += f'Answer:   {row["answer"]}\n'
+        json_str += f'Reason:   {row["reason"]}\n'
+        json_str += '=========================\n'
+    print(json_str)
+
+    # Create a PDF instance
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
+    pdf.set_font("DejaVu", '', size=10)
+    # Split the string into lines
+    lines = json_str.split('\n')
+    # Add each line to the PDF
+    for line in lines:
+        pdf.multi_cell(0, 10, line)
+    # Save the PDF to the specified path
+    pdf.output(pdf_path)
+
 @app.route('/hal/<name>/extra', methods=['GET'])
 def extra(name : str):
-    options = {
-        'encoding': 'UTF-8',
-        'margin-top': '0px',
-        'margin-right': '30px',
-        'margin-bottom': '30px',
-        'margin-left': '30px',
-        'footer-right': "Page [page] of [topage]",
-        'footer-font-size': "9",
-        'orientation': 'Portrait',
-        'page-size': 'A4',
-    }
-    data_variables = {
-        'data': reasons
-    }
-    template_directory = 'templates'
-    template_name = 'table.html'
-    json_file_path = f'data/{name}.json'
-    output_html_path = f'data/{name}.html'
-    new_pdf_path = f'data/{name}.pdf'
-
-    def to_html(json_doc):
-        return json2html.convert(json=json_doc)
-
-    def to_pdf(html_str : str):
-        return pdfkit.from_string(html_str, None)
-
-    with open(new_pdf_path, 'w') as f:
-        f.write(to_pdf(to_html(json.dumps(reasons))))
-
-
+    json_to_pdf(reasons, f'data/{name}.pdf')
+    return reasons
 
 def load_questions():
     global all_questions
