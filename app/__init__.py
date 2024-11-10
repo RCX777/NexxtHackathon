@@ -30,7 +30,7 @@ def ask_perplexity(query : str, default_to_none : bool = True, temp : float = 0.
         messages=[
             {
                 "role": "system",
-                "content": "You are a highly knowledgeable language model specialized in retrieving precise and up-to-date information from the live web about companies and e-commerce websites. Your output should focus on providing accurate details that can be used to analyze the trustworthiness of these entities. Prioritize factual data, current standings, recent news, user reviews, and any other relevant information that can influence credibility assessments. Ensure the information is clear, detailed, and verifiable to assist in making informed trustworthiness evaluations."
+                "content": "You are a compliance assistant specialized in retrieving precise and up-to-date information from the live web about companies and e-commerce websites. Your output should focus on providing accurate details that can be used to analyze the trustworthiness of these entities. Prioritize factual data, current standings, recent news, user reviews, and any other relevant information that can influence credibility assessments. Ensure the information is clear, detailed, and verifiable to assist in making informed trustworthiness evaluations."
             },
             {
                 "role": "user",
@@ -92,11 +92,14 @@ def ask_4o(query : str):
 
 
 def construct_prompt(name: str, question : str):
-    return f""" Context: The website/company you will be asked about is called {name}.
+    return f"""Context: The website/company you will be asked about is called {name}.
+    ------------------------------------------------------------------------------
     Task: Answer the following question, giving a simple yes/no answer, followed by a reason for the given answer.\
     Make sure your reason does not conflict with the given answer.\
-    If you are not sure about your answer, just say "none".\
-    Response format: {{ "answer" : "yes", "reason" : "..." }} for a valid answer or {{ "answer" : "none", "reason" : "none" }} if you're not sure.\
+    If you are not sure about your answer, just say "none".
+    ------------------------------------------------------------------------------
+    Response format: {{ "answer" : "yes", "reason" : "..." }} for a valid answer or {{ "answer" : "none", "reason" : "none" }} if you're not sure.
+    ------------------------------------------------------------------------------
     Question: {question}"""
 
 def ask_questions(questions, name, total_weight):
@@ -105,6 +108,7 @@ def ask_questions(questions, name, total_weight):
 
     for question in questions:
         prompt = construct_prompt(name, question['question'])
+        print(prompt)
         response = ask_perplexity(prompt)
 
         # normalize weight based on question count
@@ -167,7 +171,6 @@ def json_to_pdf(data, pdf_path):
         json_str += f'Answer:   {row["answer"]}\n'
         json_str += f'Reason:   {row["reason"]}\n'
         json_str += '=========================\n'
-    print(json_str)
 
     # Create a PDF instance
     pdf = FPDF()
