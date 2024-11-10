@@ -191,6 +191,13 @@ def extra(name : str):
     json_to_pdf(reasons, f'data/{name}.pdf')
     return reasons
 
+@app.route('/data/<name>', methods=['GET'])
+def get_pdf(name : str):
+    json_to_pdf(reasons, f'data/{name}.pdf')
+    with open(f'data/{name}.pdf', 'rb') as f:
+        pdf = f.read()
+    return pdf, 200
+
 def load_questions():
     global all_questions
 
