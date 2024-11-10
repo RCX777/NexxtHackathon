@@ -13,7 +13,7 @@ function MainPage() {
   };
 
   const handleNavigate = () => {
-    navigate('/payment', { state: { input: inputValue } });
+    navigate('/payment', { state: { inputURL: inputValue } });
   };
 
   return (
