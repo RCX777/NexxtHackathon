@@ -19,6 +19,7 @@
             python312Packages.flask
             python312Packages.mechanicalsoup
             python312Packages.selenium
+            python312Packages.openai
 
             chromedriver
             chromium
