@@ -16,10 +16,7 @@
           buildInputs = with pkgs; [
             python312
             python312Packages.python-lsp-server
-            python312Packages.flask
-            python312Packages.mechanicalsoup
-            python312Packages.selenium
-            python312Packages.openai
+            stdenv.cc.cc.lib
 
             chromedriver
             chromium
@@ -28,6 +25,9 @@
             nodejs
             yarn
           ];
+          shellHook = ''
+            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}:$LD_LIBRARY_PATH"
+          '';
         };
       }
     );

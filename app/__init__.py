@@ -10,6 +10,8 @@ import json
 import re
 import concurrent.futures
 
+reasons = []
+
 app = Flask(__name__)
 
 # requires AZURE_OPENAI_API_KEY env variable to be set
@@ -92,6 +94,7 @@ def ask_4o(query : str):
 def construct_prompt(name: str, question : str):
     return f""" Context: The website/company you will be asked about is called {name}.
     Task: Answer the following question, giving a simple yes/no answer, followed by a reason for the given answer.\
+    Make sure your reason does not conflict with the given answer.\
     If you are not sure about your answer, just say "none".\
     Response format: {{ "answer" : "yes", "reason" : "..." }} for a valid answer or {{ "answer" : "none", "reason" : "none" }} if you're not sure.\
     Question: {question}"""
@@ -120,11 +123,13 @@ def ask_questions(questions, name, total_weight):
 
     return responses, score
 
-def get_top_reasons(responses, positive, count = 3):
-    print(f"positive: {positive}")
+def get_reasons(responses, positive):
     filtered_responses = [res for res in responses if res['answer'] == ('yes' if positive else 'no')]
-    sorted_responses = sorted(responses, key=lambda d: d['weight'], reverse=True)
+    sorted_responses = sorted(filtered_responses, key=lambda d: d['weight'], reverse=True)
+    return sorted_responses
 
+def get_top_reasons(responses, positive, count = 3):
+    sorted_responses = get_reasons(responses, positive)
     return [res['reason'] for res in sorted_responses[:count]]
 
 @app.route('/hal/<name>', methods=['GET'])
@@ -150,11 +155,38 @@ def hallucinate(name : str):
             responses += [res for res in result[0] if res['answer'] != 'none' and res['reason'] != 'none']
             score += result[1]
 
+    reasons[:] = responses
     return json.dumps({'score' : str(score), 'top reasons' : get_top_reasons(responses, score > 0.2)}), 200
 
-@app.route('/', methods=['GET'])
-def get_current_time():
-    return "", 200
+from fpdf import FPDF
+def json_to_pdf(data, pdf_path):
+    # Convert JSON data to a pretty printed string
+    json_str = "\t\t ===== Fraud report ===== \t\t\n"
+    for row in data:
+        json_str += f'Question: {row["question"]}\n'
+        json_str += f'Answer:   {row["answer"]}\n'
+        json_str += f'Reason:   {row["reason"]}\n'
+        json_str += '=========================\n'
+    print(json_str)
+
+    # Create a PDF instance
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
+    pdf.set_font("DejaVu", '', size=10)
+    # Split the string into lines
+    lines = json_str.split('\n')
+    # Add each line to the PDF
+    for line in lines:
+        pdf.multi_cell(0, 10, line)
+    # Save the PDF to the specified path
+    pdf.output(pdf_path)
+
+@app.route('/hal/<name>/extra', methods=['GET'])
+def extra(name : str):
+    json_to_pdf(reasons, f'data/{name}.pdf')
+    return reasons
 
 def load_questions():
     global all_questions
