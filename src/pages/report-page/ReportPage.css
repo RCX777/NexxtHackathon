@@ -81,5 +81,19 @@
 }
 
 .download-btn {
+    display: inline-block;
+    padding: 10px 20px;
     margin-top: 10px;
-}
+    color: rgb(0, 0, 0);
+    background-color: #fee600;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s;
+  }
+  
+  .download-btn:hover {
+    background-color: #fee600;
+  }
+  

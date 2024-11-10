@@ -10,29 +10,29 @@
   }
   
   .main-page img {
-    width: 60%;  /* Adjust the size of the image */
-    max-width: 800px;  /* Prevent the image from getting too large */
-    margin-bottom: 30px;  /* Space between image and button */
-    border-radius: 10px;  /* Optional: round corners of the image */
+    width: 60%;
+    max-width: 800px;
+    margin-bottom: 30px;
+    border-radius: 10px;
   }
   
   .main-page button {
-    padding: 12px 24px;  /* Padding for button */
-    font-size: 16px;  /* Font size */
-    background-color: #007bff;  /* Blue background color */
-    color: white;  /* White text color */
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
     border: none;
-    border-radius: 8px;  /* Rounded corners */
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease;  /* Smooth transition on hover */
+    transition: background-color 0.3s ease;
   }
   
   .main-page button:hover {
-    background-color: #0056b3;  /* Darker blue when hovering */
+    background-color: #0056b3;
   }
   
   .main-page button:focus {
-    outline: none;  /* Remove the outline when clicked */
+    outline: none;
   }
   
   .text-input {
