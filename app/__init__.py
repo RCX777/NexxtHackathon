@@ -3,8 +3,12 @@ import os
 from datetime import datetime
 from flask import Flask, json
 import requests
+from requests.models import Response
 from openai import OpenAI, AzureOpenAI
-from openperplex import OpenperplexSync
+from litellm import completion, get_supported_openai_params
+import json
+import re
+import concurrent.futures
 
 app = Flask(__name__)
 
@@ -15,13 +19,13 @@ client_4o = AzureOpenAI(
 )
 
 perp_api_key = os.environ['PERP_API_KEY']
-client_perp = OpenperplexSync(api_key=perp_api_key)
+perp_client = OpenAI(api_key=perp_api_key, base_url="https://api.perplexity.ai")
+all_questions = []
 
-def ask_perplexity(query : str, temp : float = 0.2, top_p : float = 0.9):
-    url = "https://api.perplexity.ai/chat/completions"
-    payload = {
-        "model": "llama-3.1-sonar-large-128k-online",
-        "messages": [
+def ask_perplexity(query : str, default_to_none : bool = True, temp : float = 0.1, top_p : float = 0.1) -> dict:
+    response = completion(
+        model="perplexity/llama-3.1-sonar-small-128k-online",
+        messages=[
             {
                 "role": "system",
                 "content": "You are a highly knowledgeable language model specialized in retrieving precise and up-to-date information from the live web about companies and e-commerce websites. Your output should focus on providing accurate details that can be used to analyze the trustworthiness of these entities. Prioritize factual data, current standings, recent news, user reviews, and any other relevant information that can influence credibility assessments. Ensure the information is clear, detailed, and verifiable to assist in making informed trustworthiness evaluations."
@@ -31,39 +35,41 @@ def ask_perplexity(query : str, temp : float = 0.2, top_p : float = 0.9):
                 "content": query
             }
         ],
-        # "max_tokens": 4096,
-        "temperature": temp,
-        "top_p": top_p,
-        "search_domain_filter": ["perplexity.ai"],
-        "return_images": False,
-        "return_related_questions": False,
-        "search_recency_filter": "month",
-        "top_k": 0,
-        "stream": False,
-        "presence_penalty": 0,
-        "frequency_penalty": 1
-    }
-    headers = {
-        "Authorization": f"Bearer {perp_api_key}",
-        "Content-Type": "application/json"
-    }
-    response = requests.request("POST", url, json=payload, headers=headers)
-    json = response.json()['choices'][0]['message']['content']
-    if json[0] == '`':
-        json = json[8:-3]
-    else:
-        json = '{' + json + '}'
-    json = json[::-1]
-    length = len(json)
-    for i in range(length):
-        if json[i] == '"':
-            json = json[:i] + json[i + 1:length]
-            break
-    json = json[::-1]
-    length = len(json)
-    json = json[:length - 2] + '"' + json[length - 2:]
+        api_key=perp_api_key,
+        temp=temp,
+        top_p=top_p
+    ).json()['choices'][0]['message']['content']
 
-    return json
+    # legacy code
+    # json = response.json()['choices'][0]['message']['content']
+    # if json[0] == '`':
+    #     json = json[8:-3]
+    # else:
+    #     json = '{' + json + '}'
+    # json = json[::-1]
+    # length = len(json)
+    # for i in range(length):
+    #     if json[i] == '"':
+    #         json = json[:i] + json[i + 1:length]
+    #         break
+    # json = json[::-1]
+    # length = len(json)
+    # json = json[:length - 2] + '"' + json[length - 2:]
+
+    # remove citations
+    response = re.sub(r"\[\d\]", "", response)
+
+
+
+    try:
+        response = json.loads(response)
+    except ValueError:
+        if default_to_none:
+            response = {"answer" : "none", "reason" : "none"}
+        else:
+            response = {"response" : response}
+
+    return response
 
 def ask_4o(query : str):
     completion = client_4o.chat.completions.create(
@@ -84,42 +90,85 @@ def ask_4o(query : str):
 
 
 def construct_prompt(name: str, question : str):
-    return f""" INFORMATION: The website/company is called {name}
-    INSTRUCTION: Using the given information, answer to the following question, which is delimited by "=====" Answer with a json object containing the "answer" field which is boolean true/false, and "reason" field which is the reason for the given answer. Only output valid JSON. Do not use any extra syntax or characters. Make sure you do not forget the brackets. Make sure the last quotation mark is right behind the last bracket. Write the JSON after the "CUE:".
-    EXAMPLE OUTPUT FORMAT:
-{{"answer": true, "reason": "text"}}
-    =====
-    {question}
-    =====
-    CUE:
-    """
+    return f""" Context: The website/company you will be asked about is called {name}.
+    Task: Answer the following question, giving a simple yes/no answer, followed by a reason for the given answer.\
+    If you are not sure about your answer, just say "none".\
+    Response format: {{ "answer" : "yes", "reason" : "..." }} for a valid answer or {{ "answer" : "none", "reason" : "none" }} if you're not sure.\
+    Question: {question}"""
+
+def ask_questions(questions, name, total_weight):
+    score = 0
+    responses = []
+
+    for question in questions:
+        prompt = construct_prompt(name, question['question'])
+        response = ask_perplexity(prompt)
+
+        # normalize weight based on question count
+        weight = question['weight'] / total_weight
+
+        if response["answer"] == "yes":
+            score += weight
+        elif response["answer"] == "no":
+            score -= weight
+
+        # copy question and weight in response, to be used for getting top most important reasons
+        response['question'] = question['question']
+        response['weight'] = weight
+
+        responses.append(response)
+
+    return responses, score
+
+def get_top_reasons(responses, positive, count = 3):
+    print(f"positive: {positive}")
+    filtered_responses = [res for res in responses if res['answer'] == ('yes' if positive else 'no')]
+    sorted_responses = sorted(responses, key=lambda d: d['weight'], reverse=True)
+
+    return [res['reason'] for res in sorted_responses[:count]]
 
 @app.route('/hal/<name>', methods=['GET'])
 def hallucinate(name : str):
-    with open('questions.txt', 'r') as f:
-        questions = f.read().splitlines()
+    question_count = len(all_questions)
+    thread_count = 16
 
-    # question_count = len(questions)
-    question_count = 10
+    total_weight = sum([question['weight'] for question in all_questions[:question_count]], 0)
 
-    output_json = '['
-    for i in range(question_count):
-        prompt = construct_prompt(name, questions[i])
-        result = ask_perplexity(prompt)
-        print(result)
-        print('=======')
-        output_json += result
-        if i != question_count - 1:
-            output_json += ","
-    output_json += ']'
+    # total score will be between -1 and 1
+    score = 0
 
-    return json.loads(output_json), 200
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(ask_questions, all_questions[int(question_count / thread_count * i) : int(question_count / thread_count * (i + 1))], name, total_weight) for i in range(thread_count)]
+
+        results = [f.result() for f in futures]
+
+        responses = []
+
+        # aggregate responses and partial scores
+        for result in results:
+            # filter invalid responses
+            responses += [res for res in result[0] if res['answer'] != 'none' and res['reason'] != 'none']
+            score += result[1]
+
+    return json.dumps({'score' : str(score), 'top reasons' : get_top_reasons(responses, score > 0.2)}), 200
 
 @app.route('/', methods=['GET'])
 def get_current_time():
     return "", 200
 
+def load_questions():
+    global all_questions
+
+    with open('questions/questions.txt', 'r') as f:
+        all_questions = json.loads(f.read())
+
 def main():
+    load_questions()
+
+    # pilosaleltd.com -> ~0.08 score
+    # morrity.com -> ~0.10 score
+    # de pe Scammer website list pe google
+
     app.run()
 
 if __name__ == '__main__':
