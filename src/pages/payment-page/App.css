@@ -1,0 +1,29 @@
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.main-container {
+  max-width: 500px;
+  background-color: white; 
+  border: 3px solid #c3c3c3; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.main-container > *:first-child {
+  margin: 0;
+  margin-bottom: 20px;     
+}
+
+.main-container > * {
+  padding-left: 30px;
+  padding-right: 30px;
+  margin-bottom: 20px;
+}
+
+.main-container > *:last-child {
+  margin-bottom: 0;
+}

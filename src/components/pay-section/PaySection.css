@@ -17,7 +17,7 @@
     padding: 10px 20px;   /* Adaugă padding pentru buton */
     font-size: 1.5rem;       /* Setează dimensiunea fontului pentru buton */
     cursor: pointer;      /* Modifică cursorul pentru buton */
-    background-color: yellow; /* Culoare de fundal galbenă */
+    background-color: #fee600; /* Culoare de fundal galbenă */
     color: black;         /* Culoarea textului pe buton */
     font-weight: bold;    /* Textul butonului va fi bold */
     border: none;         /* Elimină borderul butonului */

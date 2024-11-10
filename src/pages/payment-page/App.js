@@ -1,9 +1,9 @@
 import React from 'react';
 import './App.css';
-import Header from './components/header/Header'; 
-import Feature from './components/feature/Feature';
-import Details from './components/details/Details';
-import PaySection from './components/pay-section/PaySection';
+import Header from '../../components/header/Header'; 
+import Feature from '../../components/feature/Feature';
+import Details from '../../components/details/Details';
+import PaySection from '../../components/pay-section/PaySection';
 
 function App() {
   const isTransactionTrust = false;
@@ -12,7 +12,7 @@ function App() {
     <div className="App">
       <div className="main-container">
         <Header />
-        <Feature isTrust={isTransactionTrust} />
+        <Feature isTrust={isTransactionTrust} isLoaded={true} />
         <Details />
         <PaySection />
         <footer className="footer">

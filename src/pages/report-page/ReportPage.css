@@ -1,0 +1,85 @@
+.ReportPage {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+}
+
+.ReportPage .header {
+    width: 100%;
+    padding-left: 120px;
+    background-color: white;
+}
+
+.divider {
+    width: 100%;
+    border: none;
+    border-bottom: 0.5px solid #474646;
+    margin: 0;
+    padding: 0;
+}
+
+.report-container {
+    width: 80%;
+    max-width: 1200px;
+    padding: 50px;
+    border-radius: 8px;
+}
+
+.report-container h1 {
+    margin: 0;
+    margin-bottom: 20px;
+    font-size: 3rem;
+}
+
+.report-container p {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.additional-container {
+    background-color: #e0e0e0;
+}
+
+.ReportPage button {
+    padding: 12px 24px;
+    font-size: 16px;
+    background-color: #fee600;
+    color: black;
+    font-weight: 550;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.ReportPage button:hover {
+    background-color: #f0ad4e;
+}
+
+.ReportPage button:focus {
+    outline: none;
+}
+
+.ReportPage h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.ReportPage .report-container img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.download-pdf {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.download-btn {
+    margin-top: 10px;
+}

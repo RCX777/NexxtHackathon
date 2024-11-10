@@ -1,0 +1,44 @@
+.main-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .main-page img {
+    width: 60%;  /* Adjust the size of the image */
+    max-width: 800px;  /* Prevent the image from getting too large */
+    margin-bottom: 30px;  /* Space between image and button */
+    border-radius: 10px;  /* Optional: round corners of the image */
+  }
+  
+  .main-page button {
+    padding: 12px 24px;  /* Padding for button */
+    font-size: 16px;  /* Font size */
+    background-color: #007bff;  /* Blue background color */
+    color: white;  /* White text color */
+    border: none;
+    border-radius: 8px;  /* Rounded corners */
+    cursor: pointer;
+    transition: background-color 0.3s ease;  /* Smooth transition on hover */
+  }
+  
+  .main-page button:hover {
+    background-color: #0056b3;  /* Darker blue when hovering */
+  }
+  
+  .main-page button:focus {
+    outline: none;  /* Remove the outline when clicked */
+  }
+  
+  .text-input {
+    padding: 8px;
+    margin-bottom: 20px;
+    width: 45%;
+    font-size: 16px;
+  }
+  
