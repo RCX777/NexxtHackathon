@@ -34,11 +34,9 @@ function App() {
     <div className="App">
       <div className="main-container">
         <Header />
-        <Feature isTrust={isTransactionTrust} isLoaded={isLoaded} />
+        <Feature isTrust={isTransactionTrust} isLoaded={isLoaded} response={responseData} />
         <Details />
         <PaySection />
-
-        {responseData && <p>{JSON.stringify(responseData)}</p>}
 
         <footer className="footer">
           <p>{footerDescription}</p>

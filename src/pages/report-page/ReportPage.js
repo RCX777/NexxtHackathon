@@ -12,11 +12,11 @@ function ReportPage() {
       <hr className="divider" />
       <div className="background-container">
       <section className="report-container">
-        <h1>Security of Payments</h1>
-        <hr className="divider" />
+        <h1>Payments Security</h1>
         <p>
-          Aceasta este o descriere simplă a raportului. Aici poți adăuga informații suplimentare despre raportul curent.
+        Reliability Analytics for websites evaluates factors like security, user reviews, and potential fraud risks to determine if a site is trustworthy for transactions.
         </p>
+        <hr className="divider" />
 
         <section className="additional-container">
           <p>Acesta este un container suplimentar care urmează după descriere.</p>
@@ -26,7 +26,7 @@ function ReportPage() {
           <img src={PDFIcon}></img>
           <h2>Download the report in PDF format:</h2>
         </section>
-        <button className="download-btn">Download PDF</button>
+        <button className="download-btn">Download Report</button>
       </section>
       </div>
     </div>
