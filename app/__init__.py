@@ -9,6 +9,10 @@ from litellm import completion, get_supported_openai_params
 import json
 import re
 import concurrent.futures
+import pdfkit
+import json2html
+
+reasons = []
 
 app = Flask(__name__)
 
@@ -92,6 +96,7 @@ def ask_4o(query : str):
 def construct_prompt(name: str, question : str):
     return f""" Context: The website/company you will be asked about is called {name}.
     Task: Answer the following question, giving a simple yes/no answer, followed by a reason for the given answer.\
+    Make sure your reason does not conflict with the given answer.\
     If you are not sure about your answer, just say "none".\
     Response format: {{ "answer" : "yes", "reason" : "..." }} for a valid answer or {{ "answer" : "none", "reason" : "none" }} if you're not sure.\
     Question: {question}"""
@@ -120,11 +125,13 @@ def ask_questions(questions, name, total_weight):
 
     return responses, score
 
-def get_top_reasons(responses, positive, count = 3):
-    print(f"positive: {positive}")
+def get_reasons(responses, positive):
     filtered_responses = [res for res in responses if res['answer'] == ('yes' if positive else 'no')]
-    sorted_responses = sorted(responses, key=lambda d: d['weight'], reverse=True)
+    sorted_responses = sorted(filtered_responses, key=lambda d: d['weight'], reverse=True)
+    return sorted_responses
 
+def get_top_reasons(responses, positive, count = 3):
+    sorted_responses = get_reasons(responses, positive)
     return [res['reason'] for res in sorted_responses[:count]]
 
 @app.route('/hal/<name>', methods=['GET'])
@@ -150,11 +157,41 @@ def hallucinate(name : str):
             responses += [res for res in result[0] if res['answer'] != 'none' and res['reason'] != 'none']
             score += result[1]
 
+    reasons[:] = responses
     return json.dumps({'score' : str(score), 'top reasons' : get_top_reasons(responses, score > 0.2)}), 200
 
-@app.route('/', methods=['GET'])
-def get_current_time():
-    return "", 200
+@app.route('/hal/<name>/extra', methods=['GET'])
+def extra(name : str):
+    options = {
+        'encoding': 'UTF-8',
+        'margin-top': '0px',
+        'margin-right': '30px',
+        'margin-bottom': '30px',
+        'margin-left': '30px',
+        'footer-right': "Page [page] of [topage]",
+        'footer-font-size': "9",
+        'orientation': 'Portrait',
+        'page-size': 'A4',
+    }
+    data_variables = {
+        'data': reasons
+    }
+    template_directory = 'templates'
+    template_name = 'table.html'
+    json_file_path = f'data/{name}.json'
+    output_html_path = f'data/{name}.html'
+    new_pdf_path = f'data/{name}.pdf'
+
+    def to_html(json_doc):
+        return json2html.convert(json=json_doc)
+
+    def to_pdf(html_str : str):
+        return pdfkit.from_string(html_str, None)
+
+    with open(new_pdf_path, 'w') as f:
+        f.write(to_pdf(to_html(json.dumps(reasons))))
+
+
 
 def load_questions():
     global all_questions
